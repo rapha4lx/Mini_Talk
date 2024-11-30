@@ -1,4 +1,5 @@
 #include <unistd.h>
+#include <stdlib.h>
 #include <signal.h>
 
 #include "aux_func.h"
@@ -16,7 +17,7 @@ void    send_bits(const char c, int pid)
 			kill(pid, SIGUSR1);
 		else
 			kill(pid, SIGUSR2);
-		usleep(5);
+		usleep(1);
     }
 }
 
@@ -32,25 +33,23 @@ void    send_message(const char *str, int pid)
 	}
 }
 
+void	error_message(const char *str)
+{
+	ft_putstr(str);
+	exit(0);
+}
+
 int main(int argc, char **argv)
 {
     int server_pid;
-	int argc_count;
 
 	if (argc <= 1)
-	{
-		ft_putstr("You dont input message\n");
-		return (0);
-	}
-
+		error_message("You dont insert your PID\n");
+	else if (argc <= 2)
+		error_message("You dont insert your message\n");
     server_pid = ft_atoi(argv[1]);
-	argc_count = 2;
-	ft_putnbr(server_pid);
-	ft_putchar('\n');
-	while (argv[argc_count])
-	{
-		send_message(argv[argc_count], server_pid);
-		argc_count++;
-	}
-	
+	if (server_pid <= 0)
+		error_message("PID 0 or less is not valid\n");
+	send_message(argv[2], server_pid);
+	return (0);
 }
