@@ -10,15 +10,14 @@ void    sig_func(int sig)
     static unsigned char bits = 0;
 
     if (sig == SIGUSR1)
-        bits = (bits << 1);
-    else if (sig == SIGUSR2)
         bits = (bits << 1) | 1;
+    else if (sig == SIGUSR2)
+        bits = (bits << 1);
     bits_count++;
     if (bits_count >= 8)
     {
         ft_putchar(bits);
         bits_count = 0;
-        // bits <<= 8;
     }
 }
 
@@ -35,6 +34,5 @@ int main()
     signal(SIGUSR1, sig_func);
     signal(SIGUSR2, sig_func);
     while (1)
-        pause();
-        // ;
+        ;
 }
