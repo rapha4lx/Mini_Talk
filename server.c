@@ -1,38 +1,57 @@
-#include <unistd.h>
-#include <signal.h>
-
 #include "aux_func.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <signal.h>
+#include <unistd.h>
 
-void    sig_func(int sig)
-{   
-    //ft_putstr("sig trigged\n");
-    static int bits_count = 0;
-    static unsigned char bits = 0;
+void	sig_func(int sig, siginfo_t *info, void *context)
+{
+	static int				bits_count = 0;
+	static unsigned char	bits = 0;
+	static int				last_pid = 0;
 
-    if (sig == SIGUSR1)
-        bits = (bits << 1) | 1;
-    else if (sig == SIGUSR2)
-        bits = (bits << 1);
-    bits_count++;
-    if (bits_count >= 8)
-    {
-        ft_putchar(bits);
-        bits_count = 0;
-    }
+	(void)context;
+	if (info->si_pid != last_pid)
+	{
+		if (last_pid != 0)
+			ft_putchar('\n');
+		last_pid = info->si_pid;
+		ft_putstr("Message from: ");
+		ft_putnbr(last_pid);
+		ft_putchar('\n');
+	}
+	if (sig == SIGUSR1)
+		bits = (bits << 1) | 1;
+	else if (sig == SIGUSR2)
+		bits = (bits << 1);
+	bits_count++;
+	if (bits_count >= 8)
+	{
+		ft_putchar(bits);
+		bits_count = 0;
+		bits <<= 8;
+	}
 }
 
-int main()
+void	print_pid(void)
 {
-    int pid;
+	ft_putstr("[");
+	ft_putnbr(getpid());
+	ft_putstr("]");
+	ft_putchar('\n');
+}
 
-    pid = getpid();
-    ft_putstr("[");
-    ft_putnbr(pid);
-    ft_putstr("]");
-    ft_putchar('\n');
+int	main(void)
+{
+	struct sigaction	sa;
 
-    signal(SIGUSR1, sig_func);
-    signal(SIGUSR2, sig_func);
-    while (1)
-        ;
+	sa.sa_sigaction = sig_func;
+	sa.sa_flags = SA_SIGINFO;
+
+	sigaction(SIGUSR1, &sa, NULL);
+	sigaction(SIGUSR2, &sa, NULL);
+	print_pid();
+	while (1)
+		;
+	return (0);
 }
